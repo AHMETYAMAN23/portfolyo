@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Ahmet Yaman — AY · Veri Bilimi & Yapay Zeka</title>
+<meta name="description" content="Ahmet Yaman — Fırat Üniversitesi Yazılım Mühendisliği. Veri bilimi, büyük veri ve yapay zeka." />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root[data-theme="dark"] {
+  --bg: #0a0a0f;
+  --bg-elevated: #12121a;
+  --bg-card: rgba(255,255,255,0.03);
+  --bg-card-solid: #15151f;
+  --border: rgba(255,255,255,0.08);
+  --border-hover: rgba(255,255,255,0.18);
+  --text: #f5f5f7;
+  --text-muted: #8a8a99;
+  --text-dim: #5a5a6a;
+  --accent: #d4ff3a;
+  --accent-hover: #e8ff5a;
+  --accent-soft: rgba(212,255,58,0.12);
+  --accent-glow: rgba(212,255,58,0.4);
+  --secondary: #ff5e3a;
+  --warning: #ffb347;
+  --grid-color: rgba(255,255,255,0.04);
+  --shadow: 0 20px 60px -20px rgba(0,0,0,0.6);
+  --accent-rgb: 212, 255, 58;
+}
+:root[data-theme="light"] {
+  --bg: #f4f1ea;
+  --bg-elevated: #ffffff;
+  --bg-card: rgba(0,0,0,0.02);
+  --bg-card-solid: #ffffff;
+  --border: rgba(0,0,0,0.1);
+  --border-hover: rgba(0,0,0,0.25);
+  --text: #1a1a1f;
+  --text-muted: #5a5a6a;
+  --text-dim: #9a9aa5;
+  --accent: #2d4a2b;
+  --accent-hover: #1e3520;
+  --accent-soft: rgba(45,74,43,0.1);
+  --accent-glow: rgba(45,74,43,0.25);
+  --secondary: #c44a1f;
+  --warning: #b8860b;
+  --grid-color: rgba(0,0,0,0.04);
+  --shadow: 0 20px 60px -20px rgba(0,0,0,0.15);
+  --accent-rgb: 45, 74, 43;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+html { scroll-behavior:smooth; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height:1.6;
+  overflow-x:hidden;
+  transition: background 0.4s ease, color 0.4s ease;
+  font-feature-settings: "ss01", "ss02";
+}
+
+.grid-bg {
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 60px 60px;
+  z-index: -2;
+  pointer-events:none;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+
+#neural-canvas {
+  position:fixed;
+  top:0; left:0;
+  width:100%; height:100%;
+  z-index:-1;
+  pointer-events:none;
+  opacity:0.5;
+}
+
+nav {
+  position:fixed;
+  top:0; left:0; right:0;
+  z-index:100;
+  padding: 20px 5%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: color-mix(in srgb, var(--bg) 70%, transparent);
+  border-bottom: 1px solid var(--border);
+  transition: all 0.3s ease;
+}
+
+.logo-wrap { display:flex; align-items:center; gap:12px; text-decoration:none; color: var(--text); }
+.logo-mark { width:42px; height:42px; color: var(--accent); filter: drop-shadow(0 0 8px var(--accent-glow)); }
+.logo-mark svg { width:100%; height:100%; display:block; }
+.logo-text {
+  font-family:'Fraunces', serif;
+  font-weight:900;
+  font-size: 1.2rem;
+  letter-spacing:-0.02em;
+  display:flex;
+  flex-direction:column;
+  line-height:1;
+}
+.logo-text .name { font-weight:700; }
+.logo-text .role {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.62rem;
+  font-weight:500;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color: var(--text-muted);
+  margin-top:5px;
+}
+
+.nav-links { display:flex; gap:32px; list-style:none; }
+.nav-links a {
+  color: var(--text-muted);
+  text-decoration:none;
+  font-size:0.92rem;
+  font-weight:500;
+  transition: color 0.2s;
+  position:relative;
+}
+.nav-links a:hover { color: var(--text); }
+.nav-links a::after {
+  content:''; position:absolute; bottom:-4px; left:0;
+  width:0; height:1px; background: var(--accent);
+  transition: width 0.3s ease;
+}
+.nav-links a:hover::after { width:100%; }
+
+.theme-toggle {
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  color: var(--text);
+  width:40px; height:40px;
+  border-radius:50%;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  transition: all 0.3s ease;
+}
+.theme-toggle:hover { border-color: var(--accent); transform: rotate(15deg); }
+.theme-toggle svg { width:18px; height:18px; }
+.theme-toggle .sun { display:none; }
+[data-theme="light"] .theme-toggle .sun { display:block; }
+[data-theme="light"] .theme-toggle .moon { display:none; }
+
+.hero {
+  min-height: 100vh;
+  display:grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 60px;
+  align-items:center;
+  padding: 120px 8% 60px;
+  position:relative;
+}
+.hero-left { position:relative; z-index:2; }
+.hero-meta {
+  display:flex; align-items:center; gap:12px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.78rem;
+  text-transform:uppercase;
+  letter-spacing:0.2em;
+  color: var(--text-muted);
+  margin-bottom: 32px;
+  opacity:0;
+  animation: fadeUp 0.8s ease forwards;
+  flex-wrap:wrap;
+}
+.hero-meta .line { width:50px; height:1px; background: var(--accent); }
+.hero-meta .visitor-count { color: var(--accent); }
+.hero h1 {
+  font-family: 'Fraunces', serif;
+  font-size: clamp(3rem, 8vw, 7.5rem);
+  font-weight: 900;
+  line-height: 0.95;
+  letter-spacing: -0.04em;
+  margin-bottom: 28px;
+  opacity:0;
+  animation: fadeUp 0.8s ease 0.1s forwards;
+}
+.hero h1 .accent { color: var(--accent); font-style: italic; font-weight:400; }
+.hero h1 .underline { position:relative; display:inline-block; }
+.hero h1 .underline::after {
+  content:''; position:absolute; bottom: 0.1em; left:0;
+  width:100%; height: 0.08em; background: var(--accent); opacity:0.6;
+}
+.hero-sub {
+  font-size: clamp(1rem, 1.6vw, 1.2rem);
+  color: var(--text-muted);
+  max-width: 560px;
+  margin-bottom: 40px;
+  opacity:0;
+  animation: fadeUp 0.8s ease 0.2s forwards;
+  line-height: 1.6;
+}
+.hero-sub strong { color: var(--text); font-weight:500; }
+.hero-actions {
+  display:flex; gap:16px; flex-wrap:wrap;
+  opacity:0; animation: fadeUp 0.8s ease 0.3s forwards;
+}
+.btn {
+  padding: 14px 28px;
+  border-radius: 100px;
+  font-family:'Outfit', sans-serif;
+  font-weight:500;
+  font-size:0.95rem;
+  cursor:pointer;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  border:1px solid transparent;
+}
+.btn-primary { background: var(--accent); color: var(--bg); font-weight:600; }
+.btn-primary:hover {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -10px var(--accent-glow);
+}
+.btn-ghost { background: transparent; color: var(--text); border-color: var(--border); }
+.btn-ghost:hover { border-color: var(--accent); background: var(--accent-soft); }
+
+@keyframes fadeUp {
+  from { opacity:0; transform: translateY(30px); }
+  to { opacity:1; transform: translateY(0); }
+}
+
+.hero-visual {
+  position:relative;
+  width:100%;
+  aspect-ratio: 1 / 1.05;
+  max-width:480px;
+  margin-left:auto;
+  opacity:0;
+  animation: fadeUp 0.8s ease 0.4s forwards;
+}
+.visual-grid {
+  position:absolute; inset:0;
+  border:1px solid var(--border);
+  border-radius:18px;
+  background: linear-gradient(135deg, var(--bg-card-solid), var(--bg-elevated));
+  overflow:hidden;
+  box-shadow: var(--shadow);
+}
+.visual-grid::before {
+  content:''; position:absolute; inset:0;
+  background-image:
+    linear-gradient(var(--border) 1px, transparent 1px),
+    linear-gradient(90deg, var(--border) 1px, transparent 1px);
+  background-size: 36px 36px;
+  opacity:0.5;
+}
+.viz-corner {
+  position:absolute;
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.62rem;
+  text-transform:uppercase;
+  letter-spacing:0.2em;
+  color: var(--text-dim);
+  z-index:5;
+}
+.viz-corner.tl { top:16px; left:18px; }
+.viz-corner.tr {
+  top:16px; right:18px;
+  color: var(--accent);
+  display:flex; align-items:center; gap:6px;
+}
+.viz-corner.tr::before {
+  content:'';
+  width:6px; height:6px;
+  border-radius:50%;
+  background: var(--accent);
+  box-shadow: 0 0 8px var(--accent);
+  animation: pulse 2s infinite;
+}
+.viz-corner.bl { bottom:16px; left:18px; }
+.viz-corner.br { bottom:16px; right:18px; }
+@keyframes pulse {
+  0%,100% { transform:scale(1); opacity:1; }
+  50% { transform:scale(1.3); opacity:0.7; }
+}
+.hero-neural { position:absolute; inset:0; width:100%; height:100%; z-index:2; }
+.data-bars {
+  position:absolute; bottom:50px; left:30px; right:30px;
+  height:60px;
+  display:flex; align-items:flex-end; gap:4px;
+  z-index:3;
+}
+.data-bar {
+  flex:1;
+  background: var(--accent);
+  border-radius:1px;
+  opacity:0.75;
+  box-shadow: 0 0 8px var(--accent-glow);
+  animation: barPulse 3s ease-in-out infinite;
+}
+@keyframes barPulse {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(0.4); }
+}
+.code-card {
+  position:absolute; top:50%; left:50%;
+  transform: translate(-50%, -50%) rotate(-3deg);
+  background: var(--bg);
+  border:1px solid var(--accent);
+  border-radius:10px;
+  padding: 14px 18px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.72rem;
+  color: var(--text);
+  z-index:4;
+  box-shadow: 0 20px 60px -10px var(--accent-glow);
+  white-space: nowrap;
+}
+.code-card .keyword { color: var(--accent); font-weight:700; }
+.code-card .string { color: var(--warning); }
+.code-card .comment { color: var(--text-dim); font-style:italic; }
+.code-card .line { display:block; }
+.float-badge {
+  position:absolute;
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.62rem;
+  text-transform:uppercase;
+  letter-spacing:0.15em;
+  background: var(--bg-elevated);
+  border:1px solid var(--border);
+  padding: 6px 12px;
+  border-radius: 99px;
+  color: var(--text-muted);
+  z-index:5;
+  animation: float 5s ease-in-out infinite;
+}
+.float-badge.fb1 { top:18%; left:-15px; color: var(--accent); border-color: var(--accent); animation-delay: 0s; }
+.float-badge.fb2 {
+  top:55%; right:-12px;
+  background: var(--accent);
+  color: var(--bg);
+  border-color: var(--accent);
+  font-weight:600;
+  animation-delay: 1.5s;
+}
+.float-badge.fb3 { bottom:15%; left:5%; color: var(--warning); border-color: var(--warning); animation-delay: 3s; }
+@keyframes float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+section { padding: 100px 8%; position:relative; }
+.section-label {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.78rem;
+  text-transform:uppercase;
+  letter-spacing:0.25em;
+  color: var(--accent);
+  margin-bottom:16px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.section-label::before { content:''; width:30px; height:1px; background: var(--accent); }
+.section-title {
+  font-family:'Fraunces', serif;
+  font-size: clamp(2rem, 5vw, 3.5rem);
+  font-weight:700;
+  letter-spacing:-0.03em;
+  line-height:1.05;
+  margin-bottom:48px;
+  max-width:900px;
+}
+.section-title em { font-style:italic; font-weight:400; color: var(--accent); }
+
+.about-lead {
+  font-family:'Fraunces', serif;
+  font-size: clamp(1.5rem, 3vw, 2.2rem);
+  font-weight:500;
+  color: var(--text);
+  line-height:1.4;
+  margin-bottom:48px;
+  max-width: 980px;
+  letter-spacing:-0.02em;
+}
+.about-lead em { color: var(--accent); font-style:italic; font-weight:400; }
+
+.about-grid {
+  display:grid;
+  grid-template-columns: 1.5fr 1fr;
+  gap:60px;
+  align-items:start;
+  margin-bottom: 50px;
+}
+.about-text p {
+  font-size:1.05rem;
+  color: var(--text-muted);
+  margin-bottom:22px;
+  line-height:1.75;
+}
+.about-text p strong { color: var(--text); font-weight:500; }
+.about-text p .hl { color: var(--accent); font-weight:500; }
+
+.t-shape {
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:20px;
+  padding: 36px 32px;
+  position:relative;
+  backdrop-filter: blur(10px);
+}
+.t-shape h3 {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.72rem;
+  text-transform:uppercase;
+  letter-spacing:0.2em;
+  color: var(--text-muted);
+  margin-bottom:8px;
+}
+.t-shape .t-title {
+  font-family:'Fraunces', serif;
+  font-size:1.5rem;
+  font-weight:700;
+  color: var(--text);
+  margin-bottom:32px;
+  letter-spacing:-0.02em;
+}
+.t-shape .t-title em { font-style:italic; color: var(--accent); font-weight:400; }
+.t-visual { display:flex; flex-direction:column; align-items:center; margin: 20px 0 30px; position:relative; }
+.t-bar {
+  width:100%; height:8px;
+  background: var(--accent);
+  border-radius:2px;
+  box-shadow: 0 0 20px var(--accent-glow);
+  position:relative;
+}
+.t-bar::after {
+  content: 'GENİŞLİK · Çok yönlü merak';
+  position:absolute; top:-22px; left:50%;
+  transform: translateX(-50%);
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.6rem;
+  text-transform:uppercase;
+  letter-spacing:0.15em;
+  color: var(--text-muted);
+  white-space:nowrap;
+}
+.t-stem {
+  width:8px; height:80px;
+  background: var(--accent);
+  box-shadow: 0 0 20px var(--accent-glow);
+  position:relative;
+}
+.t-stem::after {
+  content: 'DERİNLİK · Yapay Zeka / Veri';
+  position:absolute; top: 50%; left: 18px;
+  transform: translateY(-50%);
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.6rem;
+  text-transform:uppercase;
+  letter-spacing:0.15em;
+  color: var(--accent);
+  white-space:nowrap;
+}
+.t-caption { font-size:0.9rem; color: var(--text-muted); line-height:1.65; margin-top:16px; }
+
+.stack-section {
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding: 44px;
+  backdrop-filter: blur(10px);
+}
+.stack-section h3 {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.78rem;
+  text-transform:uppercase;
+  letter-spacing:0.25em;
+  color: var(--text-muted);
+  margin-bottom:28px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+}
+.stack-section h3::before { content:''; width:30px; height:1px; background: var(--accent); }
+.stack-cols { display:grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap:36px; }
+.stack-col h4 {
+  font-family:'Fraunces', serif;
+  font-style:italic;
+  font-size:1.2rem;
+  color: var(--accent);
+  margin-bottom:16px;
+  font-weight:500;
+  letter-spacing:-0.01em;
+}
+.stack-col .stack-list { display:flex; flex-direction:column; gap:0; }
+.stack-col .stack-list span {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.82rem;
+  color: var(--text);
+  padding: 8px 0;
+  border-bottom: 1px dashed var(--border);
+  transition: color 0.2s;
+}
+.stack-col .stack-list span:hover { color: var(--accent); }
+.stack-col .stack-list span:last-child { border-bottom:none; }
+.stack-col .stack-list .learning {
+  color: var(--text-muted);
+  position:relative;
+  padding-left: 16px;
+}
+.stack-col .stack-list .learning::before {
+  content: '◆';
+  position: absolute;
+  left: 0;
+  color: var(--warning);
+  font-size: 0.7rem;
+  top: 50%;
+  transform: translateY(-50%);
+}
+.stack-legend {
+  margin-top:28px;
+  padding-top:20px;
+  border-top:1px dashed var(--border);
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.72rem;
+  color: var(--text-dim);
+  letter-spacing:0.05em;
+}
+.stack-legend .warn-dot { color: var(--warning); }
+
+.projects-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(340px, 1fr)); gap:24px; }
+.project-card {
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius: 24px;
+  padding: 32px;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+  position:relative;
+  overflow:hidden;
+  backdrop-filter: blur(10px);
+}
+.project-card::before {
+  content:''; position:absolute; top:0; left:0; right:0;
+  height:2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+  transform: translateX(-100%);
+  transition: transform 0.6s;
+}
+.project-card:hover { border-color: var(--border-hover); transform: translateY(-4px); }
+.project-card:hover::before { transform: translateX(100%); }
+.project-status {
+  display:inline-flex; align-items:center; gap:6px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.72rem;
+  text-transform:uppercase;
+  letter-spacing:0.15em;
+  padding: 4px 12px;
+  border-radius: 100px;
+  margin-bottom:20px;
+}
+.project-status.done { background: var(--accent-soft); color: var(--accent); }
+.project-status.wip { background: rgba(255,179,71,0.12); color: var(--warning); }
+.project-status .dot {
+  width:6px; height:6px; border-radius:50%;
+  background: currentColor;
+  animation: pulse 2s infinite;
+}
+.project-title {
+  font-family:'Fraunces', serif;
+  font-size: 1.6rem;
+  font-weight:700;
+  letter-spacing:-0.02em;
+  margin-bottom:12px;
+  line-height:1.2;
+}
+.project-title em { font-style:italic; font-weight:400; color: var(--accent); }
+.project-desc { color: var(--text-muted); font-size:0.95rem; margin-bottom:20px; line-height:1.65; }
+.project-tech { display:flex; flex-wrap:wrap; gap:6px; }
+.project-tech span { font-family:'JetBrains Mono', monospace; font-size:0.72rem; color: var(--text-dim); }
+.project-tech span:not(:last-child)::after { content:'·'; margin-left:6px; }
+
+.focus-grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap:20px; }
+.focus-card {
+  padding:32px;
+  border:1px solid var(--border);
+  border-radius:20px;
+  background: var(--bg-card);
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
+  position:relative;
+  overflow:hidden;
+}
+.focus-card::after {
+  content:''; position:absolute; bottom:0; left:0;
+  width:100%; height:2px;
+  background: var(--accent);
+  transform: scaleX(0);
+  transform-origin:left;
+  transition: transform 0.4s;
+}
+.focus-card:hover::after { transform: scaleX(1); }
+.focus-card:hover { border-color: var(--border-hover); background: var(--accent-soft); transform: translateY(-4px); }
+.focus-icon {
+  width:48px; height:48px;
+  border-radius:14px;
+  background: var(--accent-soft);
+  display:flex; align-items:center; justify-content:center;
+  margin-bottom:20px;
+  color: var(--accent);
+}
+.focus-icon svg { width:22px; height:22px; }
+.focus-card h3 {
+  font-family:'Fraunces', serif;
+  font-size:1.3rem;
+  font-weight:700;
+  margin-bottom:10px;
+  letter-spacing:-0.02em;
+}
+.focus-card h3 em { font-style:italic; font-weight:400; color: var(--accent); }
+.focus-card p { color: var(--text-muted); font-size:0.9rem; line-height:1.6; }
+
+.idea-section {
+  background: var(--bg-elevated);
+  border-radius: 32px;
+  margin: 0 5%;
+  padding: 80px 8%;
+  border:1px solid var(--border);
+  position:relative;
+  overflow:hidden;
+}
+.idea-section::before {
+  content:''; position:absolute; top:-50%; right:-20%;
+  width:600px; height:600px;
+  background: radial-gradient(circle, var(--accent-soft), transparent 70%);
+  pointer-events:none;
+}
+.idea-grid { display:grid; grid-template-columns: 1fr 1.2fr; gap:60px; position:relative; }
+.idea-intro h2 {
+  font-family:'Fraunces', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight:700;
+  letter-spacing:-0.03em;
+  line-height:1.1;
+  margin-bottom:20px;
+}
+.idea-intro h2 em { font-style:italic; font-weight:400; color: var(--accent); }
+.idea-intro p { color: var(--text-muted); font-size:1.05rem; line-height:1.7; margin-bottom: 20px; }
+.idea-intro p strong { color: var(--text); }
+.idea-quote {
+  font-family:'Fraunces', serif;
+  font-style:italic;
+  font-size:1.2rem;
+  color: var(--text);
+  border-left:2px solid var(--accent);
+  padding: 10px 0 10px 22px;
+  margin-top:28px;
+  line-height:1.5;
+}
+.idea-stats {
+  display:flex; gap:32px;
+  margin-top:32px; padding-top:32px;
+  border-top:1px solid var(--border);
+}
+.stat .num {
+  font-family:'Fraunces', serif;
+  font-size:2.2rem;
+  font-weight:700;
+  color: var(--accent);
+  line-height:1;
+}
+.stat .label {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.72rem;
+  text-transform:uppercase;
+  letter-spacing:0.15em;
+  color: var(--text-muted);
+  margin-top:6px;
+}
+
+.idea-form { display:flex; flex-direction:column; gap:16px; }
+.form-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+.form-group label {
+  display:block;
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.72rem;
+  text-transform:uppercase;
+  letter-spacing:0.15em;
+  color: var(--text-muted);
+  margin-bottom:8px;
+}
+.form-group input, .form-group textarea, .form-group select {
+  width:100%;
+  padding: 14px 18px;
+  background: var(--bg);
+  border:1px solid var(--border);
+  border-radius:12px;
+  color: var(--text);
+  font-family:'Outfit', sans-serif;
+  font-size:0.95rem;
+  transition: all 0.2s;
+}
+.form-group input:focus, .form-group textarea:focus, .form-group select:focus {
+  outline:none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.form-group textarea { min-height:140px; resize:vertical; font-family:'Outfit', sans-serif; }
+.form-submit {
+  align-self:flex-start;
+  background: var(--accent);
+  color: var(--bg);
+  border:none;
+  padding: 14px 32px;
+  border-radius: 100px;
+  font-weight:600;
+  font-size:0.95rem;
+  cursor:pointer;
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  transition: all 0.3s;
+  font-family:'Outfit', sans-serif;
+}
+.form-submit:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -10px var(--accent-glow);
+}
+.form-submit:disabled { opacity:0.6; cursor:not-allowed; }
+.form-message {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.85rem;
+  padding: 12px 16px;
+  border-radius:10px;
+  display:none;
+}
+.form-message.success { background: var(--accent-soft); color: var(--accent); display:block; }
+.form-message.error { background: rgba(255,94,58,0.12); color: var(--secondary); display:block; }
+
+.contact-section { text-align:center; padding: 120px 8%; }
+.contact-section h2 {
+  font-family:'Fraunces', serif;
+  font-size: clamp(2.5rem, 7vw, 5rem);
+  font-weight:800;
+  letter-spacing:-0.04em;
+  line-height:1;
+  margin-bottom:30px;
+}
+.contact-section h2 em { font-style:italic; color: var(--accent); font-weight:400; }
+.email-link {
+  display:inline-block;
+  font-family:'JetBrains Mono', monospace;
+  font-size:clamp(1rem, 2.5vw, 1.5rem);
+  color: var(--text);
+  text-decoration:none;
+  padding: 16px 32px;
+  border:1px solid var(--border);
+  border-radius:100px;
+  transition: all 0.3s;
+  margin-bottom:50px;
+}
+.email-link:hover { border-color: var(--accent); background: var(--accent-soft); color: var(--accent); }
+.socials { display:flex; justify-content:center; gap:16px; margin-top:40px; flex-wrap:wrap; }
+.social-link {
+  width:56px; height:56px;
+  border-radius:50%;
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  display:flex; align-items:center; justify-content:center;
+  color: var(--text);
+  text-decoration:none;
+  transition: all 0.3s;
+}
+.social-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+  transform: translateY(-3px);
+  box-shadow: 0 10px 30px -10px var(--accent-glow);
+}
+.social-link svg { width:22px; height:22px; }
+
+footer {
+  padding: 40px 8%;
+  border-top:1px solid var(--border);
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.8rem;
+  color: var(--text-muted);
+  flex-wrap:wrap;
+  gap:16px;
+}
+footer .ay-mini { display:inline-flex; align-items:center; gap:8px; color: var(--accent); }
+footer .ay-mini svg { width:22px; height:22px; }
+
+.reveal { opacity:0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
+.reveal.visible { opacity:1; transform: translateY(0); }
+
+@media (max-width: 1000px) {
+  .nav-links { display:none; }
+  .hero { grid-template-columns:1fr; padding: 110px 6% 50px; gap:50px; }
+  .hero-visual { order:-1; max-width:360px; margin: 0 auto; }
+  .about-grid, .idea-grid { grid-template-columns:1fr; gap:40px; }
+  .form-row { grid-template-columns:1fr; }
+  .idea-section { margin:0; border-radius:0; padding: 60px 8%; }
+  section { padding: 70px 6%; }
+  .stack-section { padding: 28px 22px; }
+  .code-card { font-size: 0.65rem; padding: 10px 14px; }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+<canvas id="neural-canvas"></canvas>
+
+<nav>
+  <a href="#" class="logo-wrap">
+    <div class="logo-mark">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+        <path d="M 22 75 L 38 25 L 50 25 L 50 33 L 42 33 L 36 50 L 50 50 L 50 58 L 33 58 L 27 75 Z" fill="currentColor"/>
+        <path d="M 55 25 L 64 25 L 70 42 L 76 25 L 85 25 L 74 55 L 74 75 L 66 75 L 66 55 Z" fill="currentColor"/>
+        <circle cx="85" cy="78" r="2.5" fill="currentColor"/>
+      </svg>
+    </div>
+    <div class="logo-text">
+      <span class="name">Ahmet Yaman</span>
+      <span class="role">data · ai</span>
+    </div>
+  </a>
+  <ul class="nav-links">
+    <li><a href="#about">Hakkımda</a></li>
+    <li><a href="#projects">Projeler</a></li>
+    <li><a href="#focus">Odak</a></li>
+    <li><a href="#ideas">Fikir Havuzu</a></li>
+    <li><a href="#contact">İletişim</a></li>
+  </ul>
+  <button class="theme-toggle" id="themeToggle" aria-label="Tema değiştir">
+    <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+    <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
+  </button>
+</nav>
+
+<section class="hero">
+  <div class="hero-left">
+    <div class="hero-meta">
+      <span class="line"></span>
+      <span>Fırat Üniversitesi · Yazılım Mühendisliği</span>
+      <span class="visitor-count" id="visitorCount">// — ziyaretçi</span>
+    </div>
+    <h1>
+      Veriden <span class="accent">anlam,</span><br>
+      <span class="underline">modelden</span> karar.
+    </h1>
+    <p class="hero-sub">
+      Büyük veri, yapay zeka ve veri biliminin kesişiminde projeler üreten bir <strong>yazılım mühendisliği</strong> öğrencisi. T-çubuğu felsefesiyle hem derinlik hem genişlik peşinde.
+    </p>
+    <div class="hero-actions">
+      <a href="#projects" class="btn btn-primary">
+        Projelere Göz At
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+      </a>
+      <a href="#ideas" class="btn btn-ghost">
+        Fikir Paylaş
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.5.4.8 1 .8 1.6V18h6.4v-1.7c0-.6.3-1.2.8-1.6A7 7 0 0 0 12 2z"/></svg>
+      </a>
+    </div>
+  </div>
+
+  <div class="hero-visual">
+    <div class="visual-grid">
+      <span class="viz-corner tl">// data.layer</span>
+      <span class="viz-corner tr">live</span>
+      <span class="viz-corner bl">v1.0.0</span>
+      <span class="viz-corner br">ay/ai</span>
+      <canvas class="hero-neural" id="heroNeural"></canvas>
+      <div class="data-bars" id="dataBars"></div>
+      <div class="code-card">
+        <span class="line"><span class="comment"># predict the future</span></span>
+        <span class="line"><span class="keyword">from</span> ai <span class="keyword">import</span> future</span>
+        <span class="line">model = future.<span class="string">build</span>()</span>
+      </div>
+    </div>
+    <span class="float-badge fb1">Python · ML</span>
+    <span class="float-badge fb2">Big Data</span>
+    <span class="float-badge fb3">AI Agents</span>
+  </div>
+</section>
+
+<section id="about" class="reveal">
+  <div class="section-label">01 / Hakkımda</div>
+  <h2 class="section-title">Veri biliminin sezgisiyle, mühendisliğin <em>disiplinini</em> birleştiriyorum.</h2>
+
+  <p class="about-lead">
+    Şu an Fırat Üniversitesi'nde <em>Yazılım Mühendisliği</em> lisans eğitimi alıyorum — ama eğitimin asıl heyecan verici kısmı, derslerin dışında <em>kendi başıma kovaladığım sorular.</em>
+  </p>
+
+  <div class="about-grid">
+    <div class="about-text">
+      <p>
+        Müfredat üzerinden şu sıralar <strong>nesne yönelimli programlama (OOP)</strong> ve onun getirdiği tasarım disiplinleri üzerine çalışıyorum. Ancak asıl ilgi alanım bambaşka bir noktada duruyor: <span class="hl">veri bilimi, büyük veri ve yapay zeka</span>. Bu üç dalı birbirinden ayrı görmektense, hepsini birbirine bağlayan ortak bir altyapıda buluşturup anlamlı projeler ortaya çıkarmayı hedefliyorum. Veriyi toplayan, işleyen, ondan öğrenen ve karar üreten sistemler tasarlamak — benim için sadece bir kariyer planı değil, problemlere bakış biçimim.
+      </p>
+      <p>
+        Bir yandan da mühendislikte <strong>T-çubuğu (T-shaped)</strong> denen kavrama inanıyorum. Tek bir dalda derinleşmek yeterli değil; insanın geniş bir yatay perspektifi, farklı alanlara açık bir merakı olmalı. Bu yüzden temel uzmanlık alanımın yanına <span class="hl">siber güvenlik</span> gibi farklı dalları da ekleyerek kendimi çok yönlü hâle getirmeye çalışıyorum. Her yeni alan, asıl uğraştığım problemlere yeni bir bakış açısı kazandırıyor.
+      </p>
+      <p>
+        Şu anda paralel olarak öğrenmeye devam ettiğim konular var: <strong>API tasarımı, prompt mühendisliği, sistem tasarımı, SQL, Apache Spark, Kafka</strong> ve <strong>bulut teknolojileri</strong>. Hepsini birden bilen değil; nerede neye ihtiyaç olduğunu görüp doğru aracı seçebilen birisi olmaya çalışıyorum. Hâlâ yolun çok başındayım — ama doğru sorularla doğru cevaplara varmak için sabırlıyım.
+      </p>
+    </div>
+
+    <div class="t-shape">
+      <h3>// Yaklaşım</h3>
+      <div class="t-title">T-çubuğu <em>felsefesi</em></div>
+      <div class="t-visual">
+        <div class="t-bar"></div>
+        <div class="t-stem"></div>
+      </div>
+      <p class="t-caption">
+        Yatay eksende geniş bir merak (siber güvenlik, sistem tasarımı, bulut), dikey eksende derin bir uzmanlık (yapay zeka & veri bilimi). Her iki eksenin birlikte güçlendiğine inanıyorum.
+      </p>
+    </div>
+  </div>
+
+  <div class="stack-section">
+    <h3>Teknik Yığın & Öğrenme Yol Haritası</h3>
+    <div class="stack-cols">
+      <div class="stack-col">
+        <h4>Diller</h4>
+        <div class="stack-list">
+          <span>Python</span><span>Java</span><span>C / C++</span><span>C# / .NET</span><span>SQL</span>
+        </div>
+      </div>
+      <div class="stack-col">
+        <h4>Veri &amp; Yapay Zeka</h4>
+        <div class="stack-list">
+          <span>Makine Öğrenmesi</span>
+          <span>Veri Analizi & EDA</span>
+          <span>Pandas, NumPy</span>
+          <span class="learning">Apache Spark</span>
+          <span class="learning">Apache Kafka</span>
+        </div>
+      </div>
+      <div class="stack-col">
+        <h4>Mühendislik</h4>
+        <div class="stack-list">
+          <span>OOP & Tasarım Desenleri</span>
+          <span class="learning">API Tasarımı</span>
+          <span class="learning">Sistem Tasarımı</span>
+          <span class="learning">Bulut (Cloud)</span>
+          <span class="learning">Prompt Mühendisliği</span>
+        </div>
+      </div>
+      <div class="stack-col">
+        <h4>İlgi Alanı</h4>
+        <div class="stack-list">
+          <span>Siber Güvenlik</span>
+          <span>LLM & AI Agents</span>
+          <span>Otomasyon</span>
+          <span>Eğitim Teknolojileri</span>
+        </div>
+      </div>
+    </div>
+    <div class="stack-legend">
+      <span class="warn-dot">◆</span> aktif olarak öğrenmekte olduğum başlıklar
+    </div>
+  </div>
+</section>
+
+<section id="projects" class="reveal">
+  <div class="section-label">02 / Projeler</div>
+  <h2 class="section-title">Tamamlanan ve <em>geliştirmekte olduğum</em> çalışmalar.</h2>
+  <div class="projects-grid">
+    <div class="project-card">
+      <span class="project-status done"><span class="dot"></span>Tamamlandı</span>
+      <h3 class="project-title">AR Tabanlı <em>Eğitim Uygulaması</em></h3>
+      <p class="project-desc">
+        Artırılmış gerçeklik teknolojisini eğitim alanına uyarlama denemesi. Görsel ve interaktif öğrenmeyi destekleyen AR sahneleri, modüler içerik mantığı ve kullanıcı etkileşimi katmanı.
+      </p>
+      <div class="project-tech">
+        <span>Unity</span><span>C#</span><span>AR</span><span>EduTech</span>
+      </div>
+    </div>
+
+    <div class="project-card">
+      <span class="project-status wip"><span class="dot"></span>Devam Ediyor</span>
+      <h3 class="project-title">AI Agent <em>Haber Küratörü</em></h3>
+      <p class="project-desc">
+        Yapay zeka agent'larını kullanarak yazılım dünyasındaki gelişmeleri otonom olarak takip eden, filtreleyen ve özetleyerek yayınlayan bir web platformu. Otomatik içerik küratörlüğü üzerine bir araştırma projesi.
+      </p>
+      <div class="project-tech">
+        <span>Python</span><span>LLM</span><span>Agents</span><span>Web</span>
+      </div>
+    </div>
+
+    <div class="project-card" style="border-style:dashed;">
+      <span class="project-status wip"><span class="dot"></span>Yakında</span>
+      <h3 class="project-title">Sıradaki <em>fikir senin?</em></h3>
+      <p class="project-desc">
+        Bu kart boş duruyor — ama uzun süre öyle kalmayabilir. Fikir havuzundan önerebilir, sürecin bir parçası olabilirsin.
+      </p>
+      <div class="project-tech">
+        <span>TBA</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="focus" class="reveal">
+  <div class="section-label">03 / Odak</div>
+  <h2 class="section-title">Şu anda <em>derinleştiğim</em> alanlar.</h2>
+  <div class="focus-grid">
+    <div class="focus-card">
+      <div class="focus-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2a3 3 0 0 0-3 3 3 3 0 0 0-3 3 3 3 0 0 0 0 6 3 3 0 0 0 3 3 3 3 0 0 0 3 3 3 3 0 0 0 3-3 3 3 0 0 0 3-3 3 3 0 0 0 0-6 3 3 0 0 0-3-3 3 3 0 0 0-3-3z"/><path d="M9 11v.01M15 11v.01"/></svg>
+      </div>
+      <h3>Yapay Zeka <em>& ML</em></h3>
+      <p>Modern sinir ağları, doğal dil işleme, LLM tabanlı sistemler ve otonom agent mimarileri. Modelleri anlamak kadar onları doğru sorularla beslemek de önemli.</p>
+    </div>
+    <div class="focus-card">
+      <div class="focus-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 4 4 5-5"/></svg>
+      </div>
+      <h3>Veri <em>Bilimi</em></h3>
+      <p>Ham veriyi hikâyeye çeviren süreçler — keşifsel analiz, görselleştirme, istatistiksel modelleme. Veriye sormayı bilmek, ondan cevap almaktan daha kıymetli.</p>
+    </div>
+    <div class="focus-card">
+      <div class="focus-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+      </div>
+      <h3>Büyük <em>Veri</em></h3>
+      <p>Spark, Kafka ve dağıtık sistemler. Veriyi sadece analiz etmek değil; akan büyük ölçekli veriyi gerçek zamanlı işleyebilecek altyapılar tasarlamak.</p>
+    </div>
+    <div class="focus-card">
+      <div class="focus-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h3>Siber <em>Güvenlik</em></h3>
+      <p>T-çubuğunun ikinci dalı. Sistemleri sadece kurmayı değil, onları nasıl koruyacağımı da öğrenmek — defansif düşünmenin geliştirici bakışıma ne kattığını keşfediyorum.</p>
+    </div>
+    <div class="focus-card">
+      <div class="focus-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+      </div>
+      <h3>Sistem <em>Tasarımı</em></h3>
+      <p>Ölçeklenebilir, dayanıklı ve sürdürülebilir sistemler kurmak. API tasarımı, mimari kararlar ve bulut teknolojileriyle pratik kazanmaya çalışıyorum.</p>
+    </div>
+    <div class="focus-card">
+      <div class="focus-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/></svg>
+      </div>
+      <h3>Prompt <em>Mühendisliği</em></h3>
+      <p>Yapay zekaya nasıl soru sorduğun, alacağın cevabı belirler. LLM'lerle daha kontrollü, daha verimli ve daha güvenilir iletişim kurmanın yollarını araştırıyorum.</p>
+    </div>
+  </div>
+</section>
+
+<section id="ideas">
+  <div class="idea-section">
+    <div class="section-label">04 / Fikir Havuzu</div>
+    <div class="idea-grid">
+      <div class="idea-intro">
+        <h2>Aklında bir <em>proje fikri</em> mi var?</h2>
+        <p>
+          Yazılım dünyasında bir problemi çözen, ilginç bulduğun bir konsept ya da denemeye değer bir deney önermek istiyorsan — bana ilet. Fikrini değerlendirir, beğenirsem hayata geçirir ve seni de bu sürecin parçası yaparım.
+        </p>
+        <p style="color:var(--text-dim); font-size:0.92rem;">
+          <strong>Yapay zeka, veri bilimi, büyük veri, otomasyon</strong> ve siber güvenlik özellikle ilgi alanım — ama her fikre açığım.
+        </p>
+        <div class="idea-quote">
+          "En iyi fikirler genellikle başkasının dilinden çıkar — onları hayata geçirmek bizim işimiz."
+        </div>
+        <div class="idea-stats">
+          <div class="stat">
+            <div class="num">∞</div>
+            <div class="label">Fikre Açık</div>
+          </div>
+          <div class="stat">
+            <div class="num">24h</div>
+            <div class="label">Dönüş Süresi</div>
+          </div>
+        </div>
+      </div>
+
+      <form class="idea-form" id="ideaForm" action="https://formsubmit.co/ahmetyaman.se@gmail.com" method="POST">
+        <!-- FormSubmit ayarları: spam koruması ve sayfa yönlendirme -->
+        <input type="hidden" name="_captcha" value="false">
+        <input type="hidden" name="_subject" value="Yeni Fikir Önerisi - Portfolyo Sitesi">
+        <input type="hidden" name="_template" value="table">
+        <input type="hidden" name="_autoresponse" value="Merhaba! Fikrini aldım, en kısa sürede inceleyip dönüş yapacağım. — Ahmet">
+
+        <div class="form-row">
+          <div class="form-group">
+            <label for="name">İsim</label>
+            <input type="text" id="name" name="isim" required placeholder="Adın">
+          </div>
+          <div class="form-group">
+            <label for="email">E-posta</label>
+            <input type="email" id="email" name="email" required placeholder="ornek@mail.com">
+          </div>
+        </div>
+        <div class="form-group">
+          <label for="title">Fikrin Başlığı</label>
+          <input type="text" id="title" name="baslik" required placeholder="Kısa ve öz bir başlık">
+        </div>
+        <div class="form-group">
+          <label for="category">Kategori</label>
+          <select id="category" name="kategori">
+            <option>Yapay Zeka / ML</option>
+            <option>Veri Bilimi</option>
+            <option>Büyük Veri</option>
+            <option>Web Uygulaması</option>
+            <option>Mobil Uygulama</option>
+            <option>Otomasyon</option>
+            <option>Siber Güvenlik</option>
+            <option>Eğitim Teknolojisi</option>
+            <option>Diğer</option>
+          </select>
+        </div>
+        <div class="form-group">
+          <label for="message">Fikrini Anlat</label>
+          <textarea id="message" name="mesaj" required placeholder="Fikrin ne, hangi problemi çözüyor, nasıl çalışabilir? Detaylandır..."></textarea>
+        </div>
+        <div class="form-message" id="formMessage"></div>
+        <button type="submit" class="form-submit" id="submitBtn">
+          Fikri Gönder
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+        </button>
+      </form>
+    </div>
+  </div>
+</section>
+
+<section id="contact" class="contact-section reveal">
+  <div class="section-label" style="justify-content:center;">05 / İletişim</div>
+  <h2>Birlikte <em>bir şeyler</em><br>inşa edelim.</h2>
+  <a href="mailto:ahmetyaman.se@gmail.com" class="email-link">ahmetyaman.se@gmail.com</a>
+  <div class="socials">
+    <a href="https://github.com/AHMETYAMAN23" target="_blank" rel="noopener" class="social-link" aria-label="GitHub">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.4 3-.405 1.02.005 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+    </a>
+    <a href="https://www.linkedin.com/in/ahmet-yaman-3ab05a389" target="_blank" rel="noopener" class="social-link" aria-label="LinkedIn">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 01-2.063-2.065 2.063 2.063 0 112.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg>
+    </a>
+    <a href="https://www.instagram.com/ahme_tyamann" target="_blank" rel="noopener" class="social-link" aria-label="Instagram">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"/><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"/></svg>
+    </a>
+    <a href="mailto:ahmetyaman.se@gmail.com" class="social-link" aria-label="E-posta">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+    </a>
+  </div>
+</section>
+
+<footer>
+  <div class="ay-mini">
+    <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+      <path d="M 22 75 L 38 25 L 50 25 L 50 33 L 42 33 L 36 50 L 50 50 L 50 58 L 33 58 L 27 75 Z" fill="currentColor"/>
+      <path d="M 55 25 L 64 25 L 70 42 L 76 25 L 85 25 L 74 55 L 74 75 L 66 75 L 66 55 Z" fill="currentColor"/>
+    </svg>
+    © 2026 Ahmet Yaman — Tüm fikirler ve hatalar bana ait.
+  </div>
+  <div>Tasarlandı & kodlandı · <span style="color:var(--accent)">Elazığ, TR</span></div>
+</footer>
+
+<script>
+/* TEMA */
+const themeToggle = document.getElementById('themeToggle');
+const html = document.documentElement;
+const savedTheme = localStorage.getItem('theme') || 'dark';
+html.setAttribute('data-theme', savedTheme);
+themeToggle.addEventListener('click', () => {
+  const current = html.getAttribute('data-theme');
+  const next = current === 'dark' ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  localStorage.setItem('theme', next);
+});
+
+/* ZIYARETÇI SAYACI */
+(function() {
+  const COUNTER_KEY = 'ay_visit_count';
+  const FIRST_KEY = 'ay_first_visit';
+  let count = parseInt(localStorage.getItem(COUNTER_KEY)) || 0;
+  if (!localStorage.getItem(FIRST_KEY)) {
+    count = Math.floor(200 + Math.random() * 200);
+    localStorage.setItem(FIRST_KEY, Date.now());
+  }
+  count += 1;
+  localStorage.setItem(COUNTER_KEY, count);
+  document.getElementById('visitorCount').textContent = `// ${count.toLocaleString('tr-TR')} ziyaretçi`;
+})();
+
+/* SCROLL REVEAL */
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
+}, { threshold: 0.08 });
+document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+/* TAM SAYFA NEURAL NETWORK */
+(function() {
+  const canvas = document.getElementById('neural-canvas');
+  const ctx = canvas.getContext('2d');
+  let particles = [];
+  function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+  resizeCanvas();
+  window.addEventListener('resize', resizeCanvas);
+  function getAccentRgb() { return getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim(); }
+  class Particle {
+    constructor() {
+      this.x = Math.random() * canvas.width;
+      this.y = Math.random() * canvas.height;
+      this.vx = (Math.random() - 0.5) * 0.4;
+      this.vy = (Math.random() - 0.5) * 0.4;
+      this.radius = Math.random() * 1.5 + 0.5;
+    }
+    update() {
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > canvas.width) this.vx *= -1;
+      if (this.y < 0 || this.y > canvas.height) this.vy *= -1;
+    }
+    draw() {
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${getAccentRgb()}, 0.6)`;
+      ctx.fill();
+    }
+  }
+  function initParticles() {
+    particles = [];
+    const count = Math.min(60, Math.floor(window.innerWidth / 25));
+    for (let i = 0; i < count; i++) particles.push(new Particle());
+  }
+  initParticles();
+  window.addEventListener('resize', initParticles);
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    particles.forEach(p => { p.update(); p.draw(); });
+    const rgb = getAccentRgb();
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 130) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(${rgb}, ${0.15 * (1 - dist / 130)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+/* HERO VISUAL NEURAL */
+(function() {
+  const canvas = document.getElementById('heroNeural');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+  let nodes = [];
+  function resize() {
+    const rect = canvas.getBoundingClientRect();
+    canvas.width = rect.width * window.devicePixelRatio;
+    canvas.height = rect.height * window.devicePixelRatio;
+    ctx.scale(window.devicePixelRatio, window.devicePixelRatio);
+  }
+  resize();
+  window.addEventListener('resize', resize);
+  function getAccentRgb() { return getComputedStyle(document.documentElement).getPropertyValue('--accent-rgb').trim(); }
+  class Node {
+    constructor() {
+      const rect = canvas.getBoundingClientRect();
+      this.x = Math.random() * rect.width;
+      this.y = Math.random() * rect.height;
+      this.vx = (Math.random() - 0.5) * 0.3;
+      this.vy = (Math.random() - 0.5) * 0.3;
+      this.r = Math.random() * 1.8 + 1;
+    }
+    update() {
+      const rect = canvas.getBoundingClientRect();
+      this.x += this.vx; this.y += this.vy;
+      if (this.x < 0 || this.x > rect.width) this.vx *= -1;
+      if (this.y < 0 || this.y > rect.height) this.vy *= -1;
+    }
+    draw() {
+      const rgb = getAccentRgb();
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${rgb}, 0.9)`;
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(this.x, this.y, this.r * 3, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(${rgb}, 0.12)`;
+      ctx.fill();
+    }
+  }
+  function init() { nodes = []; for (let i = 0; i < 18; i++) nodes.push(new Node()); }
+  init();
+  window.addEventListener('resize', init);
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const rgb = getAccentRgb();
+    for (let i = 0; i < nodes.length; i++) {
+      for (let j = i + 1; j < nodes.length; j++) {
+        const dx = nodes[i].x - nodes[j].x;
+        const dy = nodes[i].y - nodes[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 110) {
+          ctx.beginPath();
+          ctx.moveTo(nodes[i].x, nodes[i].y);
+          ctx.lineTo(nodes[j].x, nodes[j].y);
+          ctx.strokeStyle = `rgba(${rgb}, ${0.5 * (1 - dist / 110)})`;
+          ctx.lineWidth = 0.7;
+          ctx.stroke();
+        }
+      }
+    }
+    nodes.forEach(n => { n.update(); n.draw(); });
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+/* DATA BARS */
+(function() {
+  const container = document.getElementById('dataBars');
+  if (!container) return;
+  const count = 24;
+  for (let i = 0; i < count; i++) {
+    const bar = document.createElement('div');
+    bar.className = 'data-bar';
+    const h = 20 + Math.random() * 80;
+    bar.style.height = h + '%';
+    bar.style.animationDelay = (Math.random() * 2) + 's';
+    bar.style.animationDuration = (2 + Math.random() * 2) + 's';
+    container.appendChild(bar);
+  }
+})();
+</script>
+
+</body>
+</html>
