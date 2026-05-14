@@ -805,6 +805,15 @@ footer {
 }
 footer .ay-mini { display:inline-flex; align-items:center; gap:8px; color: var(--accent); }
 footer .ay-mini svg { width:22px; height:22px; }
+footer .admin-link {
+  color: var(--text-dim);
+  text-decoration:none;
+  font-size:0.7rem;
+  letter-spacing:0.1em;
+  transition: color 0.2s;
+  margin-right: 12px;
+}
+footer .admin-link:hover { color: var(--accent); }
 
 .reveal { opacity:0; transform: translateY(30px); transition: opacity 0.8s ease, transform 0.8s ease; }
 .reveal.visible { opacity:1; transform: translateY(0); }
@@ -1095,17 +1104,11 @@ footer .ay-mini svg { width:22px; height:22px; }
         </div>
       </div>
 
-      <form class="idea-form" id="ideaForm" action="https://formsubmit.co/846d8647d617beb72cc4af7985956d69" method="POST">
-        <!-- FormSubmit ayarları: spam koruması ve sayfa yönlendirme -->
-        <input type="hidden" name="_captcha" value="false">
-        <input type="hidden" name="_subject" value="Yeni Fikir Önerisi - Portfolyo Sitesi">
-        <input type="hidden" name="_template" value="table">
-        <input type="hidden" name="_autoresponse" value="Merhaba! Fikrini aldım, en kısa sürede inceleyip dönüş yapacağım. — Ahmet">
-
+      <form class="idea-form" id="ideaForm">
         <div class="form-row">
           <div class="form-group">
             <label for="name">İsim</label>
-            <input type="text" id="name" name="isim" required placeholder="Adın">
+            <input type="text" id="name" name="name" required placeholder="Adın">
           </div>
           <div class="form-group">
             <label for="email">E-posta</label>
@@ -1114,11 +1117,11 @@ footer .ay-mini svg { width:22px; height:22px; }
         </div>
         <div class="form-group">
           <label for="title">Fikrin Başlığı</label>
-          <input type="text" id="title" name="baslik" required placeholder="Kısa ve öz bir başlık">
+          <input type="text" id="title" name="title" required placeholder="Kısa ve öz bir başlık">
         </div>
         <div class="form-group">
           <label for="category">Kategori</label>
-          <select id="category" name="kategori">
+          <select id="category" name="category">
             <option>Yapay Zeka / ML</option>
             <option>Veri Bilimi</option>
             <option>Büyük Veri</option>
@@ -1132,7 +1135,7 @@ footer .ay-mini svg { width:22px; height:22px; }
         </div>
         <div class="form-group">
           <label for="message">Fikrini Anlat</label>
-          <textarea id="message" name="mesaj" required placeholder="Fikrin ne, hangi problemi çözüyor, nasıl çalışabilir? Detaylandır..."></textarea>
+          <textarea id="message" name="message" required placeholder="Fikrin ne, hangi problemi çözüyor, nasıl çalışabilir? Detaylandır..."></textarea>
         </div>
         <div class="form-message" id="formMessage"></div>
         <button type="submit" class="form-submit" id="submitBtn">
@@ -1172,8 +1175,62 @@ footer .ay-mini svg { width:22px; height:22px; }
     </svg>
     © 2026 Ahmet Yaman — Tüm fikirler ve hatalar bana ait.
   </div>
-  <div>Tasarlandı & kodlandı · <span style="color:var(--accent)">Elazığ, TR</span></div>
+  <div>
+    <a href="admin.html" class="admin-link">⚙ admin</a>
+    Tasarlandı & kodlandı · <span style="color:var(--accent)">Elazığ, TR</span>
+  </div>
 </footer>
+
+<!-- ===== FIREBASE SDK ===== -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* ============================================================
+   ⬇⬇⬇ FIREBASE KURULUMUNDAN SONRA BURAYI DEĞİŞTİR ⬇⬇⬇
+   FIREBASE_KURULUM.md dosyasındaki ADIM 2'de aldığın değerleri yapıştır.
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "BURAYA_API_KEY",
+  authDomain: "BURAYA_AUTH_DOMAIN",
+  projectId: "BURAYA_PROJECT_ID",
+  storageBucket: "BURAYA_STORAGE_BUCKET",
+  messagingSenderId: "BURAYA_MESSAGING_SENDER_ID",
+  appId: "BURAYA_APP_ID"
+};
+
+let db = null;
+const FIREBASE_READY = firebaseConfig.apiKey !== "BURAYA_API_KEY";
+
+if (FIREBASE_READY) {
+  try {
+    const app = initializeApp(firebaseConfig);
+    db = getFirestore(app);
+    console.log("✓ Firebase bağlantısı kuruldu");
+  } catch (err) {
+    console.error("Firebase başlatılamadı:", err);
+  }
+}
+
+window.submitIdea = async function(data) {
+  if (!FIREBASE_READY || !db) {
+    return { success: false, demo: true };
+  }
+  try {
+    await addDoc(collection(db, "ideas"), {
+      ...data,
+      createdAt: serverTimestamp(),
+      read: false
+    });
+    return { success: true };
+  } catch (err) {
+    console.error("Firestore hatası:", err);
+    return { success: false, error: err.message };
+  }
+};
+
+window.FIREBASE_READY = FIREBASE_READY;
+</script>
 
 <script>
 /* TEMA */
@@ -1352,6 +1409,65 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
     container.appendChild(bar);
   }
 })();
+
+/* ===== IDEA FORM ===== */
+const ideaForm = document.getElementById('ideaForm');
+const formMessage = document.getElementById('formMessage');
+const submitBtn = document.getElementById('submitBtn');
+
+ideaForm.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  formMessage.className = 'form-message';
+  formMessage.textContent = '';
+
+  const data = {
+    name: document.getElementById('name').value.trim(),
+    email: document.getElementById('email').value.trim(),
+    title: document.getElementById('title').value.trim(),
+    category: document.getElementById('category').value,
+    message: document.getElementById('message').value.trim(),
+  };
+
+  if (data.message.length < 10) {
+    formMessage.className = 'form-message error';
+    formMessage.textContent = '✗ Lütfen fikrini en az 10 karakterle anlat.';
+    return;
+  }
+
+  submitBtn.disabled = true;
+  submitBtn.innerHTML = 'Gönderiliyor...';
+
+  let tries = 0;
+  while (typeof window.submitIdea !== 'function' && tries < 20) {
+    await new Promise(r => setTimeout(r, 100));
+    tries++;
+  }
+
+  if (typeof window.submitIdea !== 'function') {
+    formMessage.className = 'form-message error';
+    formMessage.textContent = '✗ Bağlantı kurulamadı. Lütfen sayfayı yenile.';
+    submitBtn.disabled = false;
+    submitBtn.innerHTML = 'Fikri Gönder <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+    return;
+  }
+
+  const result = await window.submitIdea(data);
+
+  if (result.demo) {
+    formMessage.className = 'form-message error';
+    formMessage.textContent = '⚠ Firebase henüz kurulmadı. FIREBASE_KURULUM.md dosyasındaki adımları takip et.';
+  } else if (result.success) {
+    formMessage.className = 'form-message success';
+    formMessage.textContent = '✓ Fikrin için teşekkürler! En kısa sürede dönüş yapacağım.';
+    ideaForm.reset();
+  } else {
+    formMessage.className = 'form-message error';
+    formMessage.textContent = '✗ Bir sorun oluştu. Lütfen doğrudan e-posta yoluyla iletişime geç.';
+  }
+
+  submitBtn.disabled = false;
+  submitBtn.innerHTML = 'Fikri Gönder <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M13 6l6 6-6 6"/></svg>';
+});
 </script>
 
 </body>

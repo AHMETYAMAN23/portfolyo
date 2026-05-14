@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="tr" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin Paneli — Ahmet Yaman</title>
+<meta name="robots" content="noindex, nofollow" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+:root {
+  --bg: #0a0a0f;
+  --bg-elevated: #12121a;
+  --bg-card: rgba(255,255,255,0.03);
+  --bg-card-solid: #15151f;
+  --border: rgba(255,255,255,0.08);
+  --border-hover: rgba(255,255,255,0.18);
+  --text: #f5f5f7;
+  --text-muted: #8a8a99;
+  --text-dim: #5a5a6a;
+  --accent: #d4ff3a;
+  --accent-hover: #e8ff5a;
+  --accent-soft: rgba(212,255,58,0.12);
+  --accent-glow: rgba(212,255,58,0.4);
+  --secondary: #ff5e3a;
+  --warning: #ffb347;
+  --success: #4ade80;
+  --grid-color: rgba(255,255,255,0.04);
+  --accent-rgb: 212, 255, 58;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  line-height:1.6;
+  min-height:100vh;
+  overflow-x:hidden;
+}
+
+.grid-bg {
+  position:fixed;
+  top:0; left:0; right:0; bottom:0;
+  background-image:
+    linear-gradient(var(--grid-color) 1px, transparent 1px),
+    linear-gradient(90deg, var(--grid-color) 1px, transparent 1px);
+  background-size: 60px 60px;
+  z-index: -1;
+  pointer-events:none;
+  mask-image: radial-gradient(ellipse at center, black 30%, transparent 80%);
+}
+
+.login-screen {
+  min-height:100vh;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  padding:24px;
+}
+.login-card {
+  width:100%;
+  max-width:440px;
+  background: var(--bg-elevated);
+  border:1px solid var(--border);
+  border-radius:24px;
+  padding:48px 40px;
+  box-shadow: 0 30px 80px -20px rgba(0,0,0,0.6);
+  position:relative;
+  overflow:hidden;
+}
+.login-card::before {
+  content:'';
+  position:absolute;
+  top:0; left:0; right:0;
+  height:3px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.login-logo {
+  display:flex;
+  flex-direction:column;
+  align-items:center;
+  margin-bottom:32px;
+}
+.login-logo svg {
+  width:60px;
+  height:60px;
+  color: var(--accent);
+  filter: drop-shadow(0 0 12px var(--accent-glow));
+  margin-bottom:16px;
+}
+.login-logo h1 {
+  font-family:'Fraunces', serif;
+  font-size:1.6rem;
+  font-weight:700;
+  letter-spacing:-0.02em;
+  margin-bottom:6px;
+}
+.login-logo h1 em { font-style:italic; color: var(--accent); font-weight:400; }
+.login-logo p {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.72rem;
+  text-transform:uppercase;
+  letter-spacing:0.2em;
+  color: var(--text-muted);
+}
+
+.login-form { display:flex; flex-direction:column; gap:16px; }
+.login-form label {
+  display:block;
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.7rem;
+  text-transform:uppercase;
+  letter-spacing:0.2em;
+  color: var(--text-muted);
+  margin-bottom:8px;
+}
+.login-form input {
+  width:100%;
+  padding: 14px 18px;
+  background: var(--bg);
+  border:1px solid var(--border);
+  border-radius:12px;
+  color: var(--text);
+  font-family:'Outfit', sans-serif;
+  font-size:0.95rem;
+  transition: all 0.2s;
+}
+.login-form input:focus {
+  outline:none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+.login-btn {
+  width:100%;
+  background: var(--accent);
+  color: var(--bg);
+  border:none;
+  padding: 14px 28px;
+  border-radius:100px;
+  font-weight:600;
+  font-size:0.95rem;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  gap:10px;
+  transition: all 0.3s;
+  font-family:'Outfit', sans-serif;
+  margin-top:8px;
+}
+.login-btn:hover:not(:disabled) {
+  background: var(--accent-hover);
+  transform: translateY(-2px);
+  box-shadow: 0 10px 30px -10px var(--accent-glow);
+}
+.login-btn:disabled { opacity:0.6; cursor:not-allowed; }
+.login-msg {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.8rem;
+  padding:12px 16px;
+  border-radius:10px;
+  display:none;
+  margin-top:4px;
+}
+.login-msg.error { background: rgba(255,94,58,0.12); color: var(--secondary); display:block; }
+.login-msg.success { background: var(--accent-soft); color: var(--accent); display:block; }
+
+.back-link {
+  display:flex;
+  justify-content:center;
+  margin-top:24px;
+}
+.back-link a {
+  color: var(--text-dim);
+  text-decoration:none;
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.75rem;
+  letter-spacing:0.1em;
+  transition: color 0.2s;
+}
+.back-link a:hover { color: var(--accent); }
+
+.dashboard { display:none; }
+.dashboard.active { display:block; }
+
+.admin-nav {
+  position:sticky;
+  top:0;
+  z-index:50;
+  padding: 20px 5%;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  background: color-mix(in srgb, var(--bg) 80%, transparent);
+  border-bottom: 1px solid var(--border);
+}
+.admin-nav .nav-logo {
+  display:flex;
+  align-items:center;
+  gap:12px;
+  text-decoration:none;
+  color: var(--text);
+}
+.admin-nav .nav-logo svg {
+  width:36px; height:36px;
+  color: var(--accent);
+  filter: drop-shadow(0 0 8px var(--accent-glow));
+}
+.admin-nav .nav-logo .nav-title {
+  font-family:'Fraunces', serif;
+  font-weight:700;
+  font-size:1.05rem;
+  letter-spacing:-0.02em;
+}
+.admin-nav .nav-logo .nav-sub {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.62rem;
+  letter-spacing:0.2em;
+  text-transform:uppercase;
+  color: var(--accent);
+  display:block;
+  margin-top:2px;
+}
+.admin-actions { display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
+.user-badge {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.75rem;
+  color: var(--text-muted);
+  padding: 6px 14px;
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:99px;
+}
+.logout-btn {
+  background: transparent;
+  border:1px solid var(--border);
+  color: var(--text-muted);
+  padding: 8px 16px;
+  border-radius:99px;
+  cursor:pointer;
+  font-family:'Outfit', sans-serif;
+  font-size:0.85rem;
+  transition: all 0.2s;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+}
+.logout-btn:hover {
+  border-color: var(--secondary);
+  color: var(--secondary);
+}
+.logout-btn svg { width:14px; height:14px; }
+
+.dashboard-content { padding: 40px 5%; }
+
+.dashboard-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:end;
+  margin-bottom:40px;
+  flex-wrap:wrap;
+  gap:20px;
+}
+.dashboard-header h1 {
+  font-family:'Fraunces', serif;
+  font-size: clamp(2rem, 4vw, 3rem);
+  font-weight:700;
+  letter-spacing:-0.03em;
+  line-height:1.05;
+}
+.dashboard-header h1 em { font-style:italic; color: var(--accent); font-weight:400; }
+.dashboard-header .subtitle {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.78rem;
+  text-transform:uppercase;
+  letter-spacing:0.2em;
+  color: var(--accent);
+  margin-bottom:12px;
+}
+
+.stats-row {
+  display:grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap:16px;
+  margin-bottom:36px;
+}
+.stat-card {
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:16px;
+  padding:24px;
+  backdrop-filter: blur(10px);
+  position:relative;
+  overflow:hidden;
+}
+.stat-card::before {
+  content:'';
+  position:absolute;
+  top:0; left:0; bottom:0;
+  width:3px;
+  background: var(--accent);
+}
+.stat-card .stat-label {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.7rem;
+  text-transform:uppercase;
+  letter-spacing:0.2em;
+  color: var(--text-muted);
+  margin-bottom:8px;
+}
+.stat-card .stat-value {
+  font-family:'Fraunces', serif;
+  font-size:2rem;
+  font-weight:700;
+  letter-spacing:-0.02em;
+  color: var(--text);
+}
+.stat-card .stat-value.accent { color: var(--accent); }
+
+.filters {
+  display:flex;
+  gap:10px;
+  margin-bottom:24px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.filter-chip {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.78rem;
+  padding: 7px 14px;
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:99px;
+  color: var(--text-muted);
+  cursor:pointer;
+  transition: all 0.2s;
+}
+.filter-chip:hover { color: var(--text); border-color: var(--border-hover); }
+.filter-chip.active {
+  background: var(--accent-soft);
+  color: var(--accent);
+  border-color: var(--accent);
+}
+.search-input {
+  flex:1;
+  min-width:240px;
+  padding: 10px 18px;
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:99px;
+  color: var(--text);
+  font-family:'Outfit', sans-serif;
+  font-size:0.9rem;
+}
+.search-input:focus { outline:none; border-color: var(--accent); }
+
+.ideas-list { display:flex; flex-direction:column; gap:14px; }
+.idea-card {
+  background: var(--bg-card);
+  border:1px solid var(--border);
+  border-radius:18px;
+  padding:24px;
+  transition: all 0.3s;
+  backdrop-filter: blur(10px);
+  position:relative;
+}
+.idea-card:hover { border-color: var(--border-hover); }
+.idea-card.unread::before {
+  content:'';
+  position:absolute;
+  top:24px; right:-1px;
+  width:8px; height:8px;
+  border-radius:50%;
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse {
+  0%,100% { transform:scale(1); opacity:1; }
+  50% { transform:scale(1.4); opacity:0.6; }
+}
+
+.idea-header {
+  display:flex;
+  justify-content:space-between;
+  align-items:flex-start;
+  gap:16px;
+  margin-bottom:14px;
+  flex-wrap:wrap;
+}
+.idea-meta {
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.72rem;
+  color: var(--text-muted);
+  flex-wrap:wrap;
+}
+.idea-meta .author { color: var(--text); font-weight:500; }
+.idea-meta .dot-sep { color: var(--text-dim); }
+.idea-meta .category-tag {
+  padding: 3px 10px;
+  border-radius:99px;
+  background: var(--accent-soft);
+  color: var(--accent);
+  font-size:0.68rem;
+}
+.idea-date {
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.72rem;
+  color: var(--text-dim);
+}
+.idea-title {
+  font-family:'Fraunces', serif;
+  font-size:1.3rem;
+  font-weight:700;
+  margin-bottom:10px;
+  letter-spacing:-0.02em;
+  line-height:1.2;
+}
+.idea-message {
+  color: var(--text-muted);
+  font-size:0.95rem;
+  line-height:1.65;
+  margin-bottom:16px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.idea-footer {
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  padding-top:14px;
+  border-top: 1px solid var(--border);
+}
+.idea-action {
+  background: transparent;
+  border:1px solid var(--border);
+  color: var(--text-muted);
+  padding: 7px 14px;
+  border-radius:99px;
+  cursor:pointer;
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.72rem;
+  text-decoration:none;
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  transition: all 0.2s;
+}
+.idea-action:hover { color: var(--text); border-color: var(--border-hover); }
+.idea-action.accent { color: var(--accent); border-color: var(--accent-soft); }
+.idea-action.accent:hover { background: var(--accent-soft); }
+.idea-action.danger:hover { color: var(--secondary); border-color: var(--secondary); }
+
+.empty-state {
+  text-align:center;
+  padding:80px 24px;
+  color: var(--text-muted);
+}
+.empty-state svg {
+  width:64px; height:64px;
+  color: var(--text-dim);
+  margin-bottom:20px;
+}
+.empty-state h3 {
+  font-family:'Fraunces', serif;
+  font-size:1.5rem;
+  color: var(--text);
+  margin-bottom:8px;
+}
+
+.loading {
+  text-align:center;
+  padding:60px 24px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.85rem;
+  color: var(--text-muted);
+}
+.loading::after {
+  content:'';
+  display:inline-block;
+  width:6px; height:6px;
+  border-radius:50%;
+  background: var(--accent);
+  margin-left:6px;
+  animation: pulse 1.2s infinite;
+}
+
+.setup-warning {
+  background: rgba(255,179,71,0.08);
+  border:1px solid rgba(255,179,71,0.3);
+  border-radius:14px;
+  padding: 16px 20px;
+  margin-bottom: 30px;
+  display:flex;
+  gap:14px;
+  align-items:flex-start;
+}
+.setup-warning svg { color: var(--warning); flex-shrink:0; margin-top:2px; }
+.setup-warning .text { color: var(--text); font-size:0.9rem; }
+.setup-warning .text strong { color: var(--warning); }
+.setup-warning .text code {
+  background: var(--bg-elevated);
+  padding: 2px 6px;
+  border-radius:4px;
+  font-family:'JetBrains Mono', monospace;
+  font-size:0.82em;
+  color: var(--accent);
+}
+
+@media (max-width: 700px) {
+  .dashboard-content { padding: 24px 5%; }
+  .admin-nav { padding: 16px 5%; }
+  .login-card { padding: 36px 24px; }
+  .idea-header { flex-direction:column; gap:8px; }
+  .filters { gap:6px; }
+  .filter-chip { font-size:0.72rem; padding: 6px 10px; }
+}
+</style>
+</head>
+<body>
+
+<div class="grid-bg"></div>
+
+<div id="loginScreen" class="login-screen">
+  <div class="login-card">
+    <div class="login-logo">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+        <path d="M 22 75 L 38 25 L 50 25 L 50 33 L 42 33 L 36 50 L 50 50 L 50 58 L 33 58 L 27 75 Z" fill="currentColor"/>
+        <path d="M 55 25 L 64 25 L 70 42 L 76 25 L 85 25 L 74 55 L 74 75 L 66 75 L 66 55 Z" fill="currentColor"/>
+        <circle cx="85" cy="78" r="2.5" fill="currentColor"/>
+      </svg>
+      <h1>Admin <em>Paneli</em></h1>
+      <p>// secure access</p>
+    </div>
+
+    <form id="loginForm" class="login-form">
+      <div>
+        <label for="email">E-posta</label>
+        <input type="email" id="email" required autocomplete="email" placeholder="admin@example.com">
+      </div>
+      <div>
+        <label for="password">Parola</label>
+        <input type="password" id="password" required autocomplete="current-password" placeholder="••••••••">
+      </div>
+      <div class="login-msg" id="loginMsg"></div>
+      <button type="submit" class="login-btn" id="loginBtn">
+        Giriş Yap
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>
+      </button>
+    </form>
+
+    <div class="back-link">
+      <a href="index.html">← ana sayfaya dön</a>
+    </div>
+  </div>
+</div>
+
+<div id="dashboard" class="dashboard">
+  <div class="admin-nav">
+    <a href="#" class="nav-logo">
+      <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <path d="M 22 75 L 38 25 L 50 25 L 50 33 L 42 33 L 36 50 L 50 50 L 50 58 L 33 58 L 27 75 Z" fill="currentColor"/>
+        <path d="M 55 25 L 64 25 L 70 42 L 76 25 L 85 25 L 74 55 L 74 75 L 66 75 L 66 55 Z" fill="currentColor"/>
+      </svg>
+      <div>
+        <div class="nav-title">Admin Paneli</div>
+        <span class="nav-sub">// fikir havuzu</span>
+      </div>
+    </a>
+    <div class="admin-actions">
+      <span class="user-badge" id="userBadge">—</span>
+      <button class="logout-btn" id="logoutBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"/></svg>
+        Çıkış
+      </button>
+    </div>
+  </div>
+
+  <div class="dashboard-content">
+    <div class="dashboard-header">
+      <div>
+        <div class="subtitle">// fikir havuzu yönetimi</div>
+        <h1>Gelen <em>fikirler</em></h1>
+      </div>
+    </div>
+
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="stat-label">Toplam Fikir</div>
+        <div class="stat-value" id="statTotal">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Yeni</div>
+        <div class="stat-value accent" id="statNew">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Bu Hafta</div>
+        <div class="stat-value" id="statWeek">—</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-label">Bu Ay</div>
+        <div class="stat-value" id="statMonth">—</div>
+      </div>
+    </div>
+
+    <div class="filters">
+      <button class="filter-chip active" data-filter="all">Tümü</button>
+      <button class="filter-chip" data-filter="unread">Okunmamış</button>
+      <button class="filter-chip" data-filter="Yapay Zeka / ML">YZ/ML</button>
+      <button class="filter-chip" data-filter="Veri Bilimi">Veri</button>
+      <button class="filter-chip" data-filter="Büyük Veri">Büyük Veri</button>
+      <button class="filter-chip" data-filter="Siber Güvenlik">Siber Güv.</button>
+      <input type="text" class="search-input" id="searchInput" placeholder="🔍 Fikir, isim veya başlık ara...">
+    </div>
+
+    <div id="ideasList" class="ideas-list"></div>
+  </div>
+</div>
+
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import {
+  getAuth,
+  signInWithEmailAndPassword,
+  signOut,
+  onAuthStateChanged
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+import {
+  getFirestore,
+  collection,
+  query,
+  orderBy,
+  onSnapshot,
+  doc,
+  updateDoc,
+  deleteDoc,
+  serverTimestamp
+} from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+/* ============================================================
+   ⬇⬇⬇ index.html'deki firebaseConfig'in AYNISI olmalı ⬇⬇⬇
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "BURAYA_API_KEY",
+  authDomain: "BURAYA_AUTH_DOMAIN",
+  projectId: "BURAYA_PROJECT_ID",
+  storageBucket: "BURAYA_STORAGE_BUCKET",
+  messagingSenderId: "BURAYA_MESSAGING_SENDER_ID",
+  appId: "BURAYA_APP_ID"
+};
+
+const FIREBASE_READY = firebaseConfig.apiKey !== "BURAYA_API_KEY";
+
+const loginScreen = document.getElementById('loginScreen');
+const dashboard = document.getElementById('dashboard');
+const loginForm = document.getElementById('loginForm');
+const loginBtn = document.getElementById('loginBtn');
+const loginMsg = document.getElementById('loginMsg');
+const logoutBtn = document.getElementById('logoutBtn');
+const userBadge = document.getElementById('userBadge');
+const ideasList = document.getElementById('ideasList');
+
+if (!FIREBASE_READY) {
+  loginScreen.innerHTML = `
+    <div class="login-card">
+      <div class="login-logo">
+        <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+          <circle cx="50" cy="50" r="46" fill="none" stroke="currentColor" stroke-width="1.5" opacity="0.3"/>
+          <path d="M 22 75 L 38 25 L 50 25 L 50 33 L 42 33 L 36 50 L 50 50 L 50 58 L 33 58 L 27 75 Z" fill="currentColor"/>
+          <path d="M 55 25 L 64 25 L 70 42 L 76 25 L 85 25 L 74 55 L 74 75 L 66 75 L 66 55 Z" fill="currentColor"/>
+        </svg>
+        <h1>Firebase <em>Kurulumu Gerekli</em></h1>
+        <p>// setup required</p>
+      </div>
+      <div class="setup-warning" style="margin-top:20px;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+        <div class="text">
+          <strong>Admin paneli henüz çalışmıyor.</strong><br><br>
+          <code>FIREBASE_KURULUM.md</code> dosyasındaki adımları takip et ve <code>admin.html</code> içindeki <code>firebaseConfig</code> değerlerini güncelle.
+        </div>
+      </div>
+      <div class="back-link"><a href="index.html">← ana sayfaya dön</a></div>
+    </div>
+  `;
+} else {
+  const app = initializeApp(firebaseConfig);
+  const auth = getAuth(app);
+  const db = getFirestore(app);
+
+  let allIdeas = [];
+  let currentFilter = 'all';
+  let searchTerm = '';
+  let unsubscribe = null;
+
+  onAuthStateChanged(auth, (user) => {
+    if (user) {
+      loginScreen.style.display = 'none';
+      dashboard.classList.add('active');
+      userBadge.textContent = user.email;
+      startListening();
+    } else {
+      loginScreen.style.display = 'flex';
+      dashboard.classList.remove('active');
+      if (unsubscribe) { unsubscribe(); unsubscribe = null; }
+    }
+  });
+
+  loginForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    loginMsg.className = 'login-msg';
+    loginMsg.textContent = '';
+    loginBtn.disabled = true;
+    loginBtn.innerHTML = 'Doğrulanıyor...';
+
+    const email = document.getElementById('email').value.trim();
+    const password = document.getElementById('password').value;
+
+    try {
+      await signInWithEmailAndPassword(auth, email, password);
+      loginMsg.className = 'login-msg success';
+      loginMsg.textContent = '✓ Giriş başarılı, yönlendiriliyor...';
+    } catch (err) {
+      loginMsg.className = 'login-msg error';
+      let msg = '✗ Giriş başarısız';
+      if (err.code === 'auth/invalid-credential' || err.code === 'auth/wrong-password' || err.code === 'auth/user-not-found') {
+        msg = '✗ E-posta veya parola yanlış';
+      } else if (err.code === 'auth/too-many-requests') {
+        msg = '✗ Çok fazla deneme. Lütfen biraz bekle.';
+      } else if (err.code === 'auth/network-request-failed') {
+        msg = '✗ İnternet bağlantısı kurulamadı';
+      }
+      loginMsg.textContent = msg;
+    } finally {
+      loginBtn.disabled = false;
+      loginBtn.innerHTML = 'Giriş Yap <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>';
+    }
+  });
+
+  logoutBtn.addEventListener('click', async () => {
+    if (confirm('Çıkmak istediğine emin misin?')) {
+      try { await signOut(auth); } catch (err) { console.error(err); }
+    }
+  });
+
+  function startListening() {
+    ideasList.innerHTML = '<div class="loading">Fikirler yükleniyor</div>';
+    const q = query(collection(db, "ideas"), orderBy("createdAt", "desc"));
+    unsubscribe = onSnapshot(q, (snapshot) => {
+      allIdeas = [];
+      snapshot.forEach((doc) => {
+        allIdeas.push({ id: doc.id, ...doc.data() });
+      });
+      updateStats();
+      renderIdeas();
+    }, (err) => {
+      console.error("Snapshot hatası:", err);
+      ideasList.innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
+          <h3>Veriler yüklenemedi</h3>
+          <p>Firestore kurallarını kontrol et.</p>
+        </div>
+      `;
+    });
+  }
+
+  function updateStats() {
+    const now = Date.now();
+    const weekAgo = now - 7 * 24 * 60 * 60 * 1000;
+    const monthAgo = now - 30 * 24 * 60 * 60 * 1000;
+
+    document.getElementById('statTotal').textContent = allIdeas.length;
+    document.getElementById('statNew').textContent = allIdeas.filter(i => !i.read).length;
+    document.getElementById('statWeek').textContent = allIdeas.filter(i => {
+      const t = i.createdAt?.toMillis?.() || 0;
+      return t > weekAgo;
+    }).length;
+    document.getElementById('statMonth').textContent = allIdeas.filter(i => {
+      const t = i.createdAt?.toMillis?.() || 0;
+      return t > monthAgo;
+    }).length;
+  }
+
+  function formatDate(ts) {
+    if (!ts?.toDate) return '—';
+    const d = ts.toDate();
+    return d.toLocaleString('tr-TR', {
+      day: '2-digit',
+      month: 'short',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;');
+  }
+
+  function renderIdeas() {
+    let list = [...allIdeas];
+
+    if (currentFilter === 'unread') {
+      list = list.filter(i => !i.read);
+    } else if (currentFilter !== 'all') {
+      list = list.filter(i => i.category === currentFilter);
+    }
+
+    if (searchTerm) {
+      const t = searchTerm.toLowerCase();
+      list = list.filter(i =>
+        (i.name || '').toLowerCase().includes(t) ||
+        (i.email || '').toLowerCase().includes(t) ||
+        (i.title || '').toLowerCase().includes(t) ||
+        (i.message || '').toLowerCase().includes(t)
+      );
+    }
+
+    if (list.length === 0) {
+      ideasList.innerHTML = `
+        <div class="empty-state">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>
+          <h3>Henüz fikir yok</h3>
+          <p>${searchTerm || currentFilter !== 'all' ? 'Bu filtreye uyan sonuç bulunamadı.' : 'İlk fikir geldiğinde burada görünecek.'}</p>
+        </div>
+      `;
+      return;
+    }
+
+    ideasList.innerHTML = list.map(idea => `
+      <div class="idea-card ${!idea.read ? 'unread' : ''}" data-id="${idea.id}">
+        <div class="idea-header">
+          <div class="idea-meta">
+            <span class="author">${escapeHtml(idea.name)}</span>
+            <span class="dot-sep">·</span>
+            <span>${escapeHtml(idea.email)}</span>
+            <span class="dot-sep">·</span>
+            <span class="category-tag">${escapeHtml(idea.category)}</span>
+          </div>
+          <span class="idea-date">${formatDate(idea.createdAt)}</span>
+        </div>
+        <h3 class="idea-title">${escapeHtml(idea.title)}</h3>
+        <p class="idea-message">${escapeHtml(idea.message)}</p>
+        <div class="idea-footer">
+          ${!idea.read ? `
+            <button class="idea-action accent" data-action="read" data-id="${idea.id}">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Okundu işaretle
+            </button>
+          ` : ''}
+          <a href="mailto:${encodeURIComponent(idea.email)}?subject=Re: ${encodeURIComponent(idea.title)}" class="idea-action">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
+            Yanıtla
+          </a>
+          <button class="idea-action danger" data-action="delete" data-id="${idea.id}">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
+            Sil
+          </button>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  document.querySelectorAll('.filter-chip').forEach(chip => {
+    chip.addEventListener('click', () => {
+      document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
+      chip.classList.add('active');
+      currentFilter = chip.dataset.filter;
+      renderIdeas();
+    });
+  });
+
+  document.getElementById('searchInput').addEventListener('input', (e) => {
+    searchTerm = e.target.value;
+    renderIdeas();
+  });
+
+  ideasList.addEventListener('click', async (e) => {
+    const btn = e.target.closest('button[data-action]');
+    if (!btn) return;
+    const id = btn.dataset.id;
+    const action = btn.dataset.action;
+
+    if (action === 'read') {
+      try {
+        await updateDoc(doc(db, "ideas", id), { read: true, readAt: serverTimestamp() });
+      } catch (err) {
+        console.error(err);
+        alert('İşaretlenemedi: ' + err.message);
+      }
+    } else if (action === 'delete') {
+      if (!confirm('Bu fikri silmek istediğine emin misin? Bu işlem geri alınamaz.')) return;
+      try {
+        await deleteDoc(doc(db, "ideas", id));
+      } catch (err) {
+        console.error(err);
+        alert('Silinemedi: ' + err.message);
+      }
+    }
+  });
+}
+</script>
+
+</body>
+</html>
