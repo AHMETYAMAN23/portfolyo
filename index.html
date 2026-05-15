@@ -10,6 +10,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+<!-- ⬇ FIREBASE CONFIG - SADECE firebase-config.js DOSYASINI DÜZENLE ⬇ -->
+<script src="firebase-config.js"></script>
+
 <style>
 :root[data-theme="dark"] {
   --bg: #0a0a0f;
@@ -1181,35 +1184,27 @@ footer .admin-link:hover { color: var(--accent); }
   </div>
 </footer>
 
-<!-- ===== FIREBASE SDK ===== -->
+<!-- ===== FIREBASE - SADECE firebase-config.js DOSYASINI DÜZENLE ===== -->
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
 import { getFirestore, collection, addDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* ============================================================
-   ⬇⬇⬇ FIREBASE KURULUMUNDAN SONRA BURAYI DEĞİŞTİR ⬇⬇⬇
-   FIREBASE_KURULUM.md dosyasındaki ADIM 2'de aldığın değerleri yapıştır.
-   ============================================================ */
-const firebaseConfig = {
-    apiKey: "AIzaSyAs8nP6GZ-41UUMBt8YXBmMni-MuKpqPK4",
-    authDomain: "ahmetyaman-portfolio.firebaseapp.com",
-    projectId: "ahmetyaman-portfolio",
-    storageBucket: "ahmetyaman-portfolio.firebasestorage.app",
-    messagingSenderId: "414231552646",
-    appId: "1:414231552646:web:632f70706b711229eda707"
-};
-
 let db = null;
-    const FIREBASE_READY = firebaseConfig.apiKey !== "AIzaSyAs8nP6GZ-41UUMBt8YXBmMni-MuKpqPK4";
+const FIREBASE_READY = window.__FIREBASE_READY__ === true;
+const firebaseConfig = window.__FIREBASE_CONFIG__;
 
-if (FIREBASE_READY) {
+console.log("🔍 Firebase config kontrol:", { ready: FIREBASE_READY, hasConfig: !!firebaseConfig });
+
+if (FIREBASE_READY && firebaseConfig) {
   try {
     const app = initializeApp(firebaseConfig);
     db = getFirestore(app);
     console.log("✓ Firebase bağlantısı kuruldu");
   } catch (err) {
-    console.error("Firebase başlatılamadı:", err);
+    console.error("✗ Firebase başlatılamadı:", err);
   }
+} else {
+  console.warn("⚠ Firebase kurulmadı. firebase-config.js'i kontrol et.");
 }
 
 window.submitIdea = async function(data) {
@@ -1224,24 +1219,22 @@ window.submitIdea = async function(data) {
     });
     return { success: true };
   } catch (err) {
-    console.error("Firestore hatası:", err);
+    console.error("Firestore yazma hatası:", err);
     return { success: false, error: err.message };
   }
 };
-
-window.FIREBASE_READY = FIREBASE_READY;
 </script>
 
 <script>
 /* TEMA */
 const themeToggle = document.getElementById('themeToggle');
-const html = document.documentElement;
+const htmlEl = document.documentElement;
 const savedTheme = localStorage.getItem('theme') || 'dark';
-html.setAttribute('data-theme', savedTheme);
+htmlEl.setAttribute('data-theme', savedTheme);
 themeToggle.addEventListener('click', () => {
-  const current = html.getAttribute('data-theme');
+  const current = htmlEl.getAttribute('data-theme');
   const next = current === 'dark' ? 'light' : 'dark';
-  html.setAttribute('data-theme', next);
+  htmlEl.setAttribute('data-theme', next);
   localStorage.setItem('theme', next);
 });
 
@@ -1265,7 +1258,7 @@ const observer = new IntersectionObserver((entries) => {
 }, { threshold: 0.08 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
-/* TAM SAYFA NEURAL NETWORK */
+/* NEURAL NETWORK ARKAPLAN */
 (function() {
   const canvas = document.getElementById('neural-canvas');
   const ctx = canvas.getContext('2d');
@@ -1410,7 +1403,7 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
   }
 })();
 
-/* ===== IDEA FORM ===== */
+/* IDEA FORM */
 const ideaForm = document.getElementById('ideaForm');
 const formMessage = document.getElementById('formMessage');
 const submitBtn = document.getElementById('submitBtn');
@@ -1455,7 +1448,7 @@ ideaForm.addEventListener('submit', async (e) => {
 
   if (result.demo) {
     formMessage.className = 'form-message error';
-    formMessage.textContent = '⚠ Firebase henüz kurulmadı. FIREBASE_KURULUM.md dosyasındaki adımları takip et.';
+    formMessage.textContent = '⚠ Firebase henüz kurulmadı. firebase-config.js dosyasını kontrol et.';
   } else if (result.success) {
     formMessage.className = 'form-message success';
     formMessage.textContent = '✓ Fikrin için teşekkürler! En kısa sürede dönüş yapacağım.';

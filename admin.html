@@ -10,6 +10,9 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,700;9..144,900&family=JetBrains+Mono:wght@400;500;700&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 
+<!-- ⬇ FIREBASE CONFIG - SADECE firebase-config.js DOSYASINI DÜZENLE ⬇ -->
+<script src="firebase-config.js"></script>
+
 <style>
 :root {
   --bg: #0a0a0f;
@@ -647,19 +650,10 @@ import {
   serverTimestamp
 } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
-/* ============================================================
-   ⬇⬇⬇ index.html'deki firebaseConfig'in AYNISI olmalı ⬇⬇⬇
-   ============================================================ */
-const firebaseConfig = {
-    apiKey: "AIzaSyAs8nP6GZ-41UUMBt8YXBmMni-MuKpqPK4",
-    authDomain: "ahmetyaman-portfolio.firebaseapp.com",
-    projectId: "ahmetyaman-portfolio",
-    storageBucket: "ahmetyaman-portfolio.firebasestorage.app",
-    messagingSenderId: "414231552646",
-    appId: "1:414231552646:web:632f70706b711229eda707"
-};
+const FIREBASE_READY = window.__FIREBASE_READY__ === true;
+const firebaseConfig = window.__FIREBASE_CONFIG__;
 
-    const FIREBASE_READY = firebaseConfig.apiKey !== "AIzaSyAs8nP6GZ-41UUMBt8YXBmMni-MuKpqPK4";
+console.log("🔍 Admin paneli Firebase kontrolü:", { ready: FIREBASE_READY, hasConfig: !!firebaseConfig });
 
 const loginScreen = document.getElementById('loginScreen');
 const dashboard = document.getElementById('dashboard');
@@ -670,7 +664,7 @@ const logoutBtn = document.getElementById('logoutBtn');
 const userBadge = document.getElementById('userBadge');
 const ideasList = document.getElementById('ideasList');
 
-if (!FIREBASE_READY) {
+if (!FIREBASE_READY || !firebaseConfig) {
   loginScreen.innerHTML = `
     <div class="login-card">
       <div class="login-logo">
@@ -686,7 +680,7 @@ if (!FIREBASE_READY) {
         <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/></svg>
         <div class="text">
           <strong>Admin paneli henüz çalışmıyor.</strong><br><br>
-          <code>FIREBASE_KURULUM.md</code> dosyasındaki adımları takip et ve <code>admin.html</code> içindeki <code>firebaseConfig</code> değerlerini güncelle.
+          <code>firebase-config.js</code> dosyasını düzenle ve değerleri yapıştır.
         </div>
       </div>
       <div class="back-link"><a href="index.html">← ana sayfaya dön</a></div>
@@ -696,6 +690,8 @@ if (!FIREBASE_READY) {
   const app = initializeApp(firebaseConfig);
   const auth = getAuth(app);
   const db = getFirestore(app);
+
+  console.log("✓ Admin paneli Firebase'e bağlandı");
 
   let allIdeas = [];
   let currentFilter = 'all';
@@ -738,8 +734,11 @@ if (!FIREBASE_READY) {
         msg = '✗ Çok fazla deneme. Lütfen biraz bekle.';
       } else if (err.code === 'auth/network-request-failed') {
         msg = '✗ İnternet bağlantısı kurulamadı';
+      } else if (err.code === 'auth/unauthorized-domain') {
+        msg = '✗ Bu domain Firebase\'de yetkili değil';
       }
       loginMsg.textContent = msg;
+      console.error("Auth hatası:", err);
     } finally {
       loginBtn.disabled = false;
       loginBtn.innerHTML = 'Giriş Yap <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4M10 17l5-5-5-5M15 12H3"/></svg>';
